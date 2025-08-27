@@ -1,11 +1,11 @@
 package com.crud.teste.repositories;
 
-import com.crud.teste.models.Usuario;
+import com.crud.teste.models.Licenca;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 @Repository
-public interface UsuarioRepository  extends JpaRepository<Usuario, UUID> {
+public interface LicencaRepository extends JpaRepository<Licenca, UUID> {
 }

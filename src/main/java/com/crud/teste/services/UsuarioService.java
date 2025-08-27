@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,11 +39,11 @@ public class UsuarioService {
     }
 
     public UsuarioDTO buscarPorId(UUID id) {
-        return usuarioRepository.findById(id).map(this::toDTO).orElse(null);
+        return usuarioRepository.findById(id).map(usuario -> toDTO(usuario)).orElse(null);
     }
 
     public List<UsuarioDTO> todosUsuarios() {
-        return usuarioRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        return usuarioRepository.findAll().stream().map(usuario -> toDTO(usuario)).collect(Collectors.toList());
     }
 
     public void deletar(UUID id) {
@@ -50,11 +51,14 @@ public class UsuarioService {
     }
 
     public UsuarioDTO atualizar(UUID id, UsuarioDTO dto) {
-        return usuarioRepository.findById(id).map(usuario ->  {
-            usuario.setNome(dto.getNome());
+        Optional<Usuario> usuarioExistente = usuarioRepository.findById(id);
+        if (usuarioExistente.isPresent()) {
+            Usuario usuario = usuarioExistente.get();
             usuario.setDataNascimento(dto.getDataNascimento());
             usuario.setEndereco(dto.getEndereco());
+            usuario.setNome(dto.getNome());
             return toDTO(usuarioRepository.save(usuario));
-        }).orElse(null);
+        }
+        return (null);
     }
 }

@@ -13,11 +13,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UsuarioController {
 
-    private  final UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
 
     @PostMapping("/criar")
     public UsuarioDTO criar(@RequestBody UsuarioDTO dto) {
         return usuarioService.criar(dto);
+
     }
 
     @GetMapping("/{id}")
