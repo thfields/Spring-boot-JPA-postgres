@@ -1,8 +1,6 @@
 package com.crud.teste.controllers;
 
 import com.crud.teste.DTO.LicencaDTO;
-import com.crud.teste.models.Licenca;
-import com.crud.teste.repositories.LicencaRepository;
 import com.crud.teste.services.LicencaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -40,5 +38,10 @@ public class LicencaContoller {
     @PutMapping("/{id}")
     public LicencaDTO atualizarLicenca(@PathVariable UUID id, @RequestBody LicencaDTO dto) {
         return licencaService.atualizarLicenca(id, dto);
+    }
+
+    @GetMapping("/validar/{id}")
+    public String validarLicenca(@PathVariable UUID id) {
+        return licencaService.validarLicenca(id);
     }
 }

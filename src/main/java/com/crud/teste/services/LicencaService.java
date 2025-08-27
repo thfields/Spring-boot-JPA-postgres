@@ -8,6 +8,7 @@ import com.crud.teste.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +70,36 @@ public class LicencaService {
 
         return (null);
     }
+
+    public String validarLicenca(UUID id) {
+        Optional<Licenca> licencaExistente = licencaRepository.findById(id);
+        if (licencaExistente.isPresent()) {
+            Licenca licenca = licencaExistente.get();
+            if (licenca.getDataDeExpiracao().isBefore(LocalDateTime.now())) {
+                return "Licença " + licenca.getIdentificador() + " expirada";
+            }
+
+            return "Licença " + licenca.getIdentificador() + " válida até " + licenca.getDataDeExpiracao();
+        }
+
+        return (null);
+    }
+
+//    public String validar(UUID id) {
+//        Optional<Licenca> licencaExistente = licencaRepository.findById(id);
+//        if (licencaExistente.isPresent()) {
+//            Licenca licenca = licencaExistente.get();
+//            if (licenca.isValida()) {
+//                return "Licença "
+//                        .concat(licenca.getIdentificador())
+//                        .concat(" válida até ")
+//                        .concat(licenca.getDataDeExpiracao().toString());
+//            }
+//            return "Licença " + licenca.getIdentificador() + " expirada";
+//        }
+//
+//        return (null);
+//    }
 
 
 }

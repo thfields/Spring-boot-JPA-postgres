@@ -28,4 +28,8 @@ public class Licenca {
     private LocalDateTime dataDeExpiracao;
 
     private String observacaoLicenca;
+
+    public boolean isValida(){
+        return this.dataDeExpiracao.isAfter(LocalDateTime.now());
+    }
 }
