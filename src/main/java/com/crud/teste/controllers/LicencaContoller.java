@@ -2,6 +2,7 @@ package com.crud.teste.controllers;
 
 import com.crud.teste.DTO.LicencaDTO;
 import com.crud.teste.services.LicencaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class LicencaContoller {
     private final LicencaService licencaService;
 
     @PostMapping("/criar")
-    public LicencaDTO criarLicenca(@RequestBody LicencaDTO dto) {
+    public LicencaDTO criarLicenca(@RequestBody @Valid LicencaDTO dto) {
         return licencaService.criarLicenca(dto);
     }
 
@@ -36,7 +37,7 @@ public class LicencaContoller {
     }
 
     @PutMapping("/{id}")
-    public LicencaDTO atualizarLicenca(@PathVariable UUID id, @RequestBody LicencaDTO dto) {
+    public LicencaDTO atualizarLicenca(@PathVariable UUID id, @RequestBody @Valid LicencaDTO dto) {
         return licencaService.atualizarLicenca(id, dto);
     }
 

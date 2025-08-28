@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -24,6 +25,6 @@ public class Usuario {
 
     private String nome;
 
-    private String dataNascimento;
+    private LocalDate dataNascimento;
     private String endereco;
 }

@@ -29,7 +29,4 @@ public class Licenca {
 
     private String observacaoLicenca;
 
-    public boolean isValida(){
-        return this.dataDeExpiracao.isAfter(LocalDateTime.now());
-    }
 }

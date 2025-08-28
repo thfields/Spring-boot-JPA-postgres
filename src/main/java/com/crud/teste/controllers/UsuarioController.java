@@ -2,6 +2,7 @@ package com.crud.teste.controllers;
 
 import com.crud.teste.DTO.UsuarioDTO;
 import com.crud.teste.services.UsuarioService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @PostMapping("/criar")
-    public UsuarioDTO criar(@RequestBody UsuarioDTO dto) {
+    public UsuarioDTO criar(@RequestBody @Valid UsuarioDTO dto) {
         return usuarioService.criar(dto);
 
     }
@@ -37,7 +38,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public UsuarioDTO atualizarUsuario(@PathVariable UUID id, @RequestBody UsuarioDTO dto) {
+    public UsuarioDTO atualizarUsuario(@PathVariable UUID id, @RequestBody @Valid UsuarioDTO dto) {
         return usuarioService.atualizar(id, dto);
     }
 }

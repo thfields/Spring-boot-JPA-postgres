@@ -1,10 +1,14 @@
 package com.crud.teste.services;
 
 import com.crud.teste.DTO.UsuarioDTO;
+import com.crud.teste.exceptions.BuscarUsuarioException;
 import com.crud.teste.models.Usuario;
 import com.crud.teste.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +43,8 @@ public class UsuarioService {
     }
 
     public UsuarioDTO buscarPorId(UUID id) {
-        return usuarioRepository.findById(id).map(usuario -> toDTO(usuario)).orElse(null);
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new BuscarUsuarioException());
+        return toDTO(usuario);
     }
 
     public List<UsuarioDTO> todosUsuarios() {
@@ -51,13 +56,12 @@ public class UsuarioService {
     }
 
     public UsuarioDTO atualizar(UUID id, UsuarioDTO dto) {
-        Optional<Usuario> usuarioExistente = usuarioRepository.findById(id);
-        if (usuarioExistente.isPresent()) {
-            Usuario usuario = usuarioExistente.get();
-            usuario.setDataNascimento(dto.getDataNascimento());
-            usuario.setEndereco(dto.getEndereco());
-            usuario.setNome(dto.getNome());
-            return toDTO(usuarioRepository.save(usuario));
+        Usuario usuarioExistente = usuarioRepository.findById(id).orElseThrow(() -> new BuscarUsuarioException());
+        if (usuarioExistente != null) {
+            usuarioExistente.setDataNascimento(dto.getDataNascimento());
+            usuarioExistente.setEndereco(dto.getEndereco());
+            usuarioExistente.setNome(dto.getNome());
+            return toDTO(usuarioRepository.save(usuarioExistente));
         }
         return (null);
     }
