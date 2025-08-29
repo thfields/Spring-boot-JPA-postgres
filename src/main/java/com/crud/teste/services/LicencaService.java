@@ -2,14 +2,15 @@ package com.crud.teste.services;
 
 import com.crud.teste.DTO.LicencaDTO;
 import com.crud.teste.exceptions.BuscarLicencaException;
+import com.crud.teste.exceptions.BuscarUsuarioException;
+import com.crud.teste.exceptions.UsuarioAtivoException;
 import com.crud.teste.models.Licenca;
 import com.crud.teste.models.Usuario;
 import com.crud.teste.repositories.LicencaRepository;
 import com.crud.teste.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.hibernate.validator.internal.constraintvalidators.hv.UUIDValidator;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +25,7 @@ public class LicencaService {
     private final LicencaRepository licencaRepository;
 
     private final UsuarioRepository usuarioRepository;
+    private final UUIDValidator uUIDValidator;
 
     private LicencaDTO toDTO(Licenca licenca) {
         return LicencaDTO.builder()
@@ -34,8 +36,7 @@ public class LicencaService {
                 .build();
     }
 
-    private Licenca toEntity(LicencaDTO dto) {
-        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId()).get();
+    private Licenca toEntity(LicencaDTO dto, Usuario usuario) {
         return Licenca.builder()
                 .identificador(dto.getIdentificador())
                 .observacaoLicenca(dto.getObservacaoLicenca())
@@ -45,7 +46,13 @@ public class LicencaService {
     }
 
     public LicencaDTO criarLicenca(LicencaDTO dto) {
-        Licenca licenca = toEntity(dto);
+
+        Usuario usuarioAtivo = usuarioRepository.findById(dto.getUsuarioId()).orElseThrow(() -> new BuscarUsuarioException());
+        if (!usuarioAtivo.getAtivo()){
+            throw new UsuarioAtivoException();
+        }
+        Licenca licenca = toEntity(dto, usuarioAtivo);
+
         return toDTO(licencaRepository.save(licenca));
     }
 
@@ -54,11 +61,16 @@ public class LicencaService {
     }
 
     public List<LicencaDTO> listarLicencas() {
-        return licencaRepository.findAll().stream().map(licenca -> toDTO(licenca)).collect(Collectors.toList());
+        return licencaRepository.findAllAtivos().stream().map(licenca -> toDTO(licenca)).collect(Collectors.toList());
     }
 
     public void deletarLicenca(UUID id) {
-        licencaRepository.deleteById(id);
+        Licenca licencaExistente  = licencaRepository.findById(id).orElseThrow(() -> new BuscarLicencaException());
+        if (licencaExistente.getAtivo().equals(true)){
+            licencaExistente.setAtivo(false);
+            licencaExistente.setDataAtualizacao(LocalDateTime.now());
+            licencaRepository.save(licencaExistente);
+        }
     }
 
     public LicencaDTO atualizarLicenca(UUID id, LicencaDTO dto) {
@@ -67,6 +79,7 @@ public class LicencaService {
             licencaExistente.setDataDeExpiracao(dto.getDataDeExpiracao());
             licencaExistente.setObservacaoLicenca(dto.getObservacaoLicenca());
             licencaExistente.setIdentificador(dto.getIdentificador());
+            licencaExistente.setDataAtualizacao(LocalDateTime.now());
             return toDTO(licencaRepository.save(licencaExistente));
         }
 

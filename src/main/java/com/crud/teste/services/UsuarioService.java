@@ -2,16 +2,15 @@ package com.crud.teste.services;
 
 import com.crud.teste.DTO.UsuarioDTO;
 import com.crud.teste.exceptions.BuscarUsuarioException;
+import com.crud.teste.exceptions.UsuarioComLicencaAtivaException;
 import com.crud.teste.models.Usuario;
+import com.crud.teste.repositories.LicencaRepository;
 import com.crud.teste.repositories.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final LicencaRepository licencaRepository;
 
     private UsuarioDTO toDTO(Usuario usuario) {
         return UsuarioDTO.builder()
@@ -48,11 +48,23 @@ public class UsuarioService {
     }
 
     public List<UsuarioDTO> todosUsuarios() {
-        return usuarioRepository.findAll().stream().map(usuario -> toDTO(usuario)).collect(Collectors.toList());
+        return usuarioRepository.findAllAtivos().stream().map(usuario -> toDTO(usuario)).collect(Collectors.toList());
     }
 
     public void deletar(UUID id) {
-        usuarioRepository.deleteById(id);
+        Usuario usuarioExistente = usuarioRepository.findById(id).orElseThrow(() -> new BuscarUsuarioException());
+
+        boolean isLicencaAtiva = licencaRepository.existsByUsuarioAndAtivoTrueAndDataDeExpiracaoAfter(usuarioExistente, LocalDateTime.now());
+        if (isLicencaAtiva) {
+            throw new UsuarioComLicencaAtivaException(
+                    "Usuario " + usuarioExistente.getNome() + " com Licenca Ativa! Só poderá ser removido se não hover nenhuma licença ativa. "
+            );
+        }
+        if (usuarioExistente.getAtivo().equals(true)) {
+            usuarioExistente.setAtivo(false);
+            usuarioExistente.setDataAtualizacao(LocalDateTime.now());
+            usuarioRepository.save(usuarioExistente);
+        }
     }
 
     public UsuarioDTO atualizar(UUID id, UsuarioDTO dto) {
@@ -61,6 +73,7 @@ public class UsuarioService {
             usuarioExistente.setDataNascimento(dto.getDataNascimento());
             usuarioExistente.setEndereco(dto.getEndereco());
             usuarioExistente.setNome(dto.getNome());
+            usuarioExistente.setDataAtualizacao(LocalDateTime.now());
             return toDTO(usuarioRepository.save(usuarioExistente));
         }
         return (null);
